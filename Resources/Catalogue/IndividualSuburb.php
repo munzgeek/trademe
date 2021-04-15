@@ -21,26 +21,25 @@
   THE SOFTWARE.
 */
 
-namespace TradeMe\HTTP;
+namespace TradeMe\Resources\Catalogue;
 
-use TradeMe\EndPoints;
-use TradeMe\Build\Headers;
-use TradeMe\Build\Signature;
-use TradeMe\HTTP;
-
-class Resources
+class IndividualSuburb extends \TradeMe\HTTP\Resources
 {
 
-  public static function resource($method, $path, $parameters = NULL)
+  private static $response;
+
+  public function __construct($region_id, $district_id, $suburb_id)
   {
-    $request = [
-      'method' => $method,
-      'uri' => EndPoints::api($path),
-      'parameters' => $parameters,
-      'headers' => Headers::generate()
-    ];
-    $request['headers']['oauth_signature'] = Signature::generate($request, $parameters);
-    return new HTTP($request);
+    $response = self::resource('get', '/Localities/Region/'.$region_id.'/'.$district_id.'/'.$suburb_id);
+    if ( $response->code() == 200 )
+    {
+      self::$response = $response->response();
+    }
+  }
+
+  public static function response()
+  {
+    return self::$response;
   }
 
 }

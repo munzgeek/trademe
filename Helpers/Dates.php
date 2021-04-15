@@ -21,26 +21,26 @@
   THE SOFTWARE.
 */
 
-namespace TradeMe\HTTP;
+namespace TradeMe\Helpers;
 
-use TradeMe\EndPoints;
-use TradeMe\Build\Headers;
-use TradeMe\Build\Signature;
-use TradeMe\HTTP;
-
-class Resources
+class Dates
 {
 
-  public static function resource($method, $path, $parameters = NULL)
+  public static function convert($str, $format = 'Y-m-d H:i:s')
   {
-    $request = [
-      'method' => $method,
-      'uri' => EndPoints::api($path),
-      'parameters' => $parameters,
-      'headers' => Headers::generate()
-    ];
-    $request['headers']['oauth_signature'] = Signature::generate($request, $parameters);
-    return new HTTP($request);
+    $numeric = intval(str_replace(')/', '', str_replace('/Date(', '', $str))/1000);
+    if ( is_null($format) )
+    {
+      return $numeric;
+    }
+    return date($format, $numeric);
+  }
+
+  public static function convert_remove_timezone($str, $format = 'Y-m-d H:i:s')
+  {
+    $str = str_replace(')/', '', str_replace('/Date(', '', $str));
+    $arr = explode('+', $str);
+    return self::convert($arr[0], $format);
   }
 
 }

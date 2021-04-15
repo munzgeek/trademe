@@ -36,7 +36,7 @@ class Signature
   {
     if ( isset($post['method']) && isset($post['uri']) )
     {
-      if ( $set_params )
+      if ( $set_params && ($post['method'] == 'get' || $post['method'] == 'delete') )
       {
         self::set_parameters(isset($post['parameters']) ? $post['parameters'] : NULL);
       }

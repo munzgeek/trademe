@@ -21,26 +21,39 @@
   THE SOFTWARE.
 */
 
-namespace TradeMe\HTTP;
+namespace TradeMe\Resources\Catalogue;
 
-use TradeMe\EndPoints;
-use TradeMe\Build\Headers;
-use TradeMe\Build\Signature;
-use TradeMe\HTTP;
+use TradeMe\Helpers\Dates;
 
-class Resources
+class DvdSearch extends \TradeMe\HTTP\Resources
 {
 
-  public static function resource($method, $path, $parameters = NULL)
+  private static $response;
+
+  public function __construct($search = NULL)
   {
-    $request = [
-      'method' => $method,
-      'uri' => EndPoints::api($path),
-      'parameters' => $parameters,
-      'headers' => Headers::generate()
-    ];
-    $request['headers']['oauth_signature'] = Signature::generate($request, $parameters);
-    return new HTTP($request);
+    $parameters = is_string($search) ? ['search' => $search] : NULL;
+    $response = self::resource('get', '/dvd/find', $parameters);
+    if ( $response->code() == 200 )
+    {
+      self::$response = $response->response();
+      if ( isset(self::$response['PageSize']) && is_numeric(self::$response['PageSize']) && self::$response['PageSize'] > 0 && isset(self::$response['List']) && is_array(self::$response['List']) )
+      {
+        foreach ( self::$response['List'] as $i => $search_item )
+        {
+          if ( isset($search_item['ReleaseDate']) )
+          {
+            $search_item['ReleaseDate'] = Dates::convert_remove_timezone($search_item['ReleaseDate'], 'Y-m-d');
+          }
+          self::$response['List'][$i] = $search_item;
+        }
+      }
+    }
+  }
+
+  public static function response()
+  {
+    return self::$response;
   }
 
 }

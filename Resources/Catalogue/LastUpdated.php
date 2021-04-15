@@ -21,26 +21,31 @@
   THE SOFTWARE.
 */
 
-namespace TradeMe\HTTP;
+namespace TradeMe\Resources\Catalogue;
 
-use TradeMe\EndPoints;
-use TradeMe\Build\Headers;
-use TradeMe\Build\Signature;
-use TradeMe\HTTP;
+use TradeMe\Helpers\Dates;
 
-class Resources
+class LastUpdated extends \TradeMe\HTTP\Resources
 {
 
-  public static function resource($method, $path, $parameters = NULL)
+  private static $timestamp;
+
+  public function __construct()
   {
-    $request = [
-      'method' => $method,
-      'uri' => EndPoints::api($path),
-      'parameters' => $parameters,
-      'headers' => Headers::generate()
-    ];
-    $request['headers']['oauth_signature'] = Signature::generate($request, $parameters);
-    return new HTTP($request);
+    $response = self::resource('get', '/Categories/lastupdated');
+    if ( $response->code() == 200 )
+    {
+      $response = $response->response();
+      if ( isset($response['LastUpdated']) && is_string($response['LastUpdated']) )
+      {
+        self::$timestamp = Dates::convert($response['LastUpdated']);
+      }
+    }
+  }
+
+  public static function response()
+  {
+    return self::$timestamp;
   }
 
 }

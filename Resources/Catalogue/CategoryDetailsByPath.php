@@ -21,26 +21,27 @@
   THE SOFTWARE.
 */
 
-namespace TradeMe\HTTP;
+namespace TradeMe\Resources\Catalogue\CategoryDetails;
 
-use TradeMe\EndPoints;
-use TradeMe\Build\Headers;
-use TradeMe\Build\Signature;
-use TradeMe\HTTP;
-
-class Resources
+class ByPath extends \TradeMe\HTTP\Resources
 {
 
-  public static function resource($method, $path, $parameters = NULL)
+  private static $response;
+
+  public function __construct($mcat_path)
   {
-    $request = [
-      'method' => $method,
-      'uri' => EndPoints::api($path),
-      'parameters' => $parameters,
-      'headers' => Headers::generate()
-    ];
-    $request['headers']['oauth_signature'] = Signature::generate($request, $parameters);
-    return new HTTP($request);
+    $response = self::resource('get', '/Categories/Details', [
+      'mcat_path' => $mcat_path
+    ]);
+    if ( $response->code() == 200 )
+    {
+      self::$response = $response->response();
+    }
+  }
+
+  public static function response()
+  {
+    return self::$response;
   }
 
 }
