@@ -21,16 +21,19 @@
   THE SOFTWARE.
 */
 
-namespace TradeMe\Resources\Bidding;
+namespace TradeMe\Resources\Branding;
 
-class SendDeliveryAddress extends \TradeMe\HTTP\Resources
+use TradeMe\Helpers\ImageFileName;
+use TradeMe\Helpers\ImageEncode;
+
+class Add extends \TradeMe\HTTP\Resources
 {
 
   private static $response;
 
-  public function __construct($purchase_id, $delivery_address_id = NULL, $contact_phone_number = NULL, $message_to_seller = NULL, $return_listing_details = false)
+  public function __construct($member_id, $image_type, $file_location)
   {
-    $response = self::resource('post', '/Bidding/SendDeliveryAddress', self::params($purchase_id, $delivery_address_id, $contact_phone_number, $message_to_seller, $return_listing_details));
+    $response = self::resource('post', '/Member/'.$member_id.'/BrandingImages', self::parameters($image_type, $file_location));
     if ( $response->code() == 200 )
     {
       self::$response = $response->response();
@@ -42,14 +45,12 @@ class SendDeliveryAddress extends \TradeMe\HTTP\Resources
     return self::$response;
   }
 
-  public static function params($purchase_id, $delivery_address_id, $contact_phone_number, $message_to_seller, $return_listing_details)
+  private static function parameters($image_type, $file_location)
   {
     $parameters = [
-      'PurchaseId' => $purchase_id,
-      'DeliveryAddressId' => $delivery_address_id,
-      'ContactPhoneNumber' => $contact_phone_number,
-      'MessageToSeller' => $message_to_seller,
-      'ReturnListingDetails' => is_bool($return_listing_details) && $return_listing_details ? 1 : 0
+      'FileName' => ImageFileName::get($file_location),
+      'BrandingImageType' => self::branding_image_type($image_type),
+      'ImageData' => ImageEncode::encode($file_location, false)
     ];
     foreach ( $parameters as $key => $value )
     {
@@ -59,6 +60,23 @@ class SendDeliveryAddress extends \TradeMe\HTTP\Resources
       }
     }
     return $parameters;
+  }
+
+  private static function branding_image_type($type)
+  {
+    $branding_image_type_list = ['Logo', 'Banner', 'Square'];
+    $keys = [
+      'Logo' => 1,
+      'Banner' => 2,
+      'Square' => 3
+    ];
+    foreach ( $branding_image_type_list as $key )
+    {
+      if ( $key == $type )
+      {
+        return $keys[$key];
+      }
+    }
   }
 
 }

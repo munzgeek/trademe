@@ -21,16 +21,16 @@
   THE SOFTWARE.
 */
 
-namespace TradeMe\Resources\Bidding;
+namespace TradeMe\Resources\Branding\BrandingImages;
 
-class SendDeliveryAddress extends \TradeMe\HTTP\Resources
+class BrandingID extends \TradeMe\HTTP\Resources
 {
 
   private static $response;
 
-  public function __construct($purchase_id, $delivery_address_id = NULL, $contact_phone_number = NULL, $message_to_seller = NULL, $return_listing_details = false)
+  public function __construct($member_id, $branding_id)
   {
-    $response = self::resource('post', '/Bidding/SendDeliveryAddress', self::params($purchase_id, $delivery_address_id, $contact_phone_number, $message_to_seller, $return_listing_details));
+    $response = self::resource('get', '/Member/'.$member_id.'/BrandingImages/'.$branding_id);
     if ( $response->code() == 200 )
     {
       self::$response = $response->response();
@@ -40,25 +40,6 @@ class SendDeliveryAddress extends \TradeMe\HTTP\Resources
   public static function response()
   {
     return self::$response;
-  }
-
-  public static function params($purchase_id, $delivery_address_id, $contact_phone_number, $message_to_seller, $return_listing_details)
-  {
-    $parameters = [
-      'PurchaseId' => $purchase_id,
-      'DeliveryAddressId' => $delivery_address_id,
-      'ContactPhoneNumber' => $contact_phone_number,
-      'MessageToSeller' => $message_to_seller,
-      'ReturnListingDetails' => is_bool($return_listing_details) && $return_listing_details ? 1 : 0
-    ];
-    foreach ( $parameters as $key => $value )
-    {
-      if ( is_null($value) )
-      {
-        unset($parameters[$key]);
-      }
-    }
-    return $parameters;
   }
 
 }

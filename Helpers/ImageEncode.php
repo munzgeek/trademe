@@ -21,44 +21,22 @@
   THE SOFTWARE.
 */
 
-namespace TradeMe\Resources\Bidding;
+namespace TradeMe\Helpers;
 
-class SendDeliveryAddress extends \TradeMe\HTTP\Resources
+class ImageEncode
 {
 
-  private static $response;
-
-  public function __construct($purchase_id, $delivery_address_id = NULL, $contact_phone_number = NULL, $message_to_seller = NULL, $return_listing_details = false)
+  public static function encode($file_location, $delete_image = true)
   {
-    $response = self::resource('post', '/Bidding/SendDeliveryAddress', self::params($purchase_id, $delivery_address_id, $contact_phone_number, $message_to_seller, $return_listing_details));
-    if ( $response->code() == 200 )
+    if ( file_exists($file_location) && is_file($file_location) )
     {
-      self::$response = $response->response();
-    }
-  }
-
-  public static function response()
-  {
-    return self::$response;
-  }
-
-  public static function params($purchase_id, $delivery_address_id, $contact_phone_number, $message_to_seller, $return_listing_details)
-  {
-    $parameters = [
-      'PurchaseId' => $purchase_id,
-      'DeliveryAddressId' => $delivery_address_id,
-      'ContactPhoneNumber' => $contact_phone_number,
-      'MessageToSeller' => $message_to_seller,
-      'ReturnListingDetails' => is_bool($return_listing_details) && $return_listing_details ? 1 : 0
-    ];
-    foreach ( $parameters as $key => $value )
-    {
-      if ( is_null($value) )
+      $raw_image_data = file_get_contents($file_location);
+      if ( is_bool($delete_image) && $delete_image )
       {
-        unset($parameters[$key]);
+        unlink($file_location);
       }
+      return base64_encode($raw_image_data);
     }
-    return $parameters;
   }
 
 }
